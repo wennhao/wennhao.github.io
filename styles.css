@@ -2,6 +2,7 @@ body, html {
     margin: 0;
     padding: 0;
     height: 100%;
+    overflow: hidden; /* Prevent scrollbars */
 }
 
 .galaxy {
@@ -12,4 +13,14 @@ body, html {
     height: 100%;
     background: url('galaxybg.jpg') no-repeat center center fixed;
     background-size: cover;
+    animation: moveGalaxy 30s linear infinite; /* Adjust duration and animation type */
+}
+
+@keyframes moveGalaxy {
+    0% {
+        transform: translate(0%, 0%);
+    }
+    100% {
+        transform: translate(-50%, -50%); /* Adjust this for your preferred movement */
+    }
 }
