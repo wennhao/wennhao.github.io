@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Cube Projection</title>
+    <link rel="stylesheet" href="styles.css">
+    <title>3D Kubus Projectie</title>
     <style>
         canvas {
             border: 1px solid #000;
@@ -11,12 +12,25 @@
     </style>
 </head>
 <body>
+    <header>
+        <nav id="topbar">
+            <ul>
+                <li><a href="#opdracht1">Opdracht 1</a></li>
+                <li><a href="#opdracht2">Opdracht 2</a></li>
+                <li><a href="#opdracht3">Opdracht 3</a></li>
+                <!-- Hier kun je nieuwe menu-items toevoegen -->
+            </ul>
+        </nav>
+    </header>
+    <!-- Canvas om de 3D-kubus weer te geven -->
     <canvas id="cubeCanvas" width="400" height="400"></canvas>
 
-    <label for="speedInput">Rotation Speed:</label>
+    <!-- Invoer om de rotatiesnelheid aan te passen -->
+    <label for="speedInput">Rotatiesnelheid:</label>
     <input type="range" id="speedInput" min="0.01" max="0.2" step="0.01" value="0.02">
 
-    <label for="sizeInput">Cube Size:</label>
+    <!-- Invoer om de grootte van de kubus aan te passen -->
+    <label for="sizeInput">Kubus Grootte:</label>
     <input type="range" id="sizeInput" min="10" max="100" step="1" value="50">
 
     <script>
@@ -25,6 +39,7 @@
         const speedInput = document.getElementById('speedInput');
         const sizeInput = document.getElementById('sizeInput');
 
+        // Hoekpunten van de kubus
         const vertices = [
             [-1, -1, -1],
             [1, -1, -1],
@@ -36,23 +51,28 @@
             [-1, 1, 1]
         ];
 
+        // Randen die hoekpunten verbinden om de kubus te vormen
         const edges = [
             [0, 1], [1, 2], [2, 3], [3, 0],
             [4, 5], [5, 6], [6, 7], [7, 4],
             [0, 4], [1, 5], [2, 6], [3, 7]
         ];
 
+        // Initiële rotatiehoeken
         let angleX = 0;
         let angleY = 0;
 
+        // Functie om de kubus op het canvas te tekenen
         function drawCube() {
             context.clearRect(0, 0, canvas.width, canvas.height);
 
+            // Projectiematrix voor 2D-weergave
             const projectionMatrix = [
                 [1, 0, 0],
                 [0, 1, 0]
             ];
 
+            // Rotatiematrix voor X- en Y-assen
             const rotationXMatrix = [
                 [1, 0, 0],
                 [0, Math.cos(angleX), -Math.sin(angleX)],
@@ -65,8 +85,10 @@
                 [-Math.sin(angleY), 0, Math.cos(angleY)]
             ];
 
+            // Combineer matrices om de transformatiematrix te vormen
             const transformationMatrix = multiplyMatrices(projectionMatrix, rotationXMatrix, rotationYMatrix);
 
+            // Teken elke rand van de kubus na toepassing van transformaties
             for (const edge of edges) {
                 const startVertex = transformVertex(vertices[edge[0]], transformationMatrix);
                 const endVertex = transformVertex(vertices[edge[1]], transformationMatrix);
@@ -78,6 +100,7 @@
             }
         }
 
+        // Functie om matrices te vermenigvuldigen
         function multiplyMatrices(...matrices) {
             return matrices.reduce((result, matrix) => {
                 const rowsA = result.length;
@@ -98,6 +121,7 @@
             });
         }
 
+        // Functie om een hoekpunt te transformeren met behulp van een matrix
         function transformVertex(vertex, matrix) {
             const result = matrix.map((row, i) =>
                 row.reduce((acc, val, j) => acc + val * vertex[j], 0)
@@ -106,6 +130,7 @@
             return result;
         }
 
+        // Functie om de rotatie van de kubus te animeren
         function animate() {
             angleX += parseFloat(speedInput.value);
             angleY += parseFloat(speedInput.value);
@@ -113,6 +138,7 @@
             requestAnimationFrame(animate);
         }
 
+        // Start de animatie
         animate();
     </script>
 </body>

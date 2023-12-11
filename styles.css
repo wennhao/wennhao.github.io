@@ -1,0 +1,31 @@
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+}
+
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 10px 0;
+}
+
+#topbar {
+    display: flex;
+    justify-content: space-around;
+}
+
+#topbar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+}
+
+#topbar li {
+    margin-right: 15px;
+}
+
+#topbar a {
+    text-decoration: none;
+    color: #fff;
+}
