@@ -1,9 +1,107 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Hello, World!</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        canvas {
+            border: 1px solid #000;
+        }
+    </style>
+    <title>Perspectiefprojectie van Kubus</title>
 </head>
 <body>
-    <h1>Hello, World!</h1>
+    <canvas id="myCanvas" width="500" height="500"></canvas>
+
+    <script>
+        // Kubuscoördinaten
+        var vertices = [
+            [-1, -1, -1],
+            [1, -1, -1],
+            [1, 1, -1],
+            [-1, 1, -1],
+            [-1, -1, 1],
+            [1, -1, 1],
+            [1, 1, 1],
+            [-1, 1, 1]
+        ];
+
+        // Verbindingen tussen kubuscoördinaten om draadmodel te vormen
+        var edges = [
+            [0, 1], [1, 2], [2, 3], [3, 0],
+            [4, 5], [5, 6], [6, 7], [7, 4],
+            [0, 4], [1, 5], [2, 6], [3, 7]
+        ];
+
+        // Canvas en context
+        var canvas = document.getElementById('myCanvas');
+        var ctx = canvas.getContext('2d');
+
+        // Hoekvariabele voor animatie
+        var angle = 0;
+
+        function drawCube() {
+            // Matrixoperaties voor transformatie
+            var projectionMatrix = [
+                [1, 0, 0],
+                [0, 1, 0],
+                [0, 0, 0]
+            ];
+
+            var rotationYMatrix = [
+                [Math.cos(angle), 0, Math.sin(angle)],
+                [0, 1, 0],
+                [-Math.sin(angle), 0, Math.cos(angle)]
+            ];
+
+            var combinedMatrix = multiplyMatrices(projectionMatrix, rotationYMatrix);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Projecteer en teken de draadkubus
+            for (var i = 0; i < edges.length; i++) {
+                var start = project(vertices[edges[i][0]], combinedMatrix);
+                var end = project(vertices[edges[i][1]], combinedMatrix);
+
+                ctx.beginPath();
+                ctx.moveTo(start[0], start[1]);
+                ctx.lineTo(end[0], end[1]);
+                ctx.stroke();
+            }
+        }
+
+        function project(point, matrix) {
+            // Matrix-vector vermenigvuldiging voor projectie
+            var x = point[0] * matrix[0][0] + point[1] * matrix[1][0] + point[2] * matrix[2][0];
+            var y = point[0] * matrix[0][1] + point[1] * matrix[1][1] + point[2] * matrix[2][1];
+            var w = point[0] * matrix[0][2] + point[1] * matrix[1][2] + point[2] * matrix[2][2];
+
+            return [canvas.width / 2 + x, canvas.height / 2 - y];
+        }
+
+        function multiplyMatrices(a, b) {
+            // Matrixvermenigvuldiging
+            var result = [];
+            for (var i = 0; i < a.length; i++) {
+                result[i] = [];
+                for (var j = 0; j < b[0].length; j++) {
+                    var sum = 0;
+                    for (var k = 0; k < a[0].length; k++) {
+                        sum += a[i][k] * b[k][j];
+                    }
+                    result[i][j] = sum;
+                }
+            }
+            return result;
+        }
+
+        function animate() {
+            angle += 0.02;
+            drawCube();
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
 </body>
 </html>
