@@ -1,140 +1,24 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
-    <title>3D Kubus Projectie</title>
-    <style>
-        canvas {
-            border: 1px solid #000;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menu Demo</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header> 
-        <script>
-            document.write('<script src="menu.html" type="text/javascript"><\/script>');
-        </script>
-    </header>
-    <!-- Canvas om de 3D-kubus weer te geven -->
-    <canvas id="cubeCanvas" width="400" height="400"></canvas>
-
-    <!-- Invoer om de rotatiesnelheid aan te passen -->
-    <label for="speedInput">Rotatiesnelheid:</label>
-    <input type="range" id="speedInput" min="0.01" max="0.2" step="0.01" value="0.02">
-
-    <!-- Invoer om de grootte van de kubus aan te passen -->
-    <label for="sizeInput">Kubus Grootte:</label>
-    <input type="range" id="sizeInput" min="10" max="100" step="1" value="50">
-
-    <script>
-        const canvas = document.getElementById('cubeCanvas');
-        const context = canvas.getContext('2d');
-        const speedInput = document.getElementById('speedInput');
-        const sizeInput = document.getElementById('sizeInput');
-
-        // Hoekpunten van de kubus
-        const vertices = [
-            [-1, -1, -1],
-            [1, -1, -1],
-            [1, 1, -1],
-            [-1, 1, -1],
-            [-1, -1, 1],
-            [1, -1, 1],
-            [1, 1, 1],
-            [-1, 1, 1]
-        ];
-
-        // Randen die hoekpunten verbinden om de kubus te vormen
-        const edges = [
-            [0, 1], [1, 2], [2, 3], [3, 0],
-            [4, 5], [5, 6], [6, 7], [7, 4],
-            [0, 4], [1, 5], [2, 6], [3, 7]
-        ];
-
-        // Initiële rotatiehoeken
-        let angleX = 0;
-        let angleY = 0;
-
-        // Functie om de kubus op het canvas te tekenen
-        function drawCube() {
-            context.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Projectiematrix voor 2D-weergave
-            const projectionMatrix = [
-                [1, 0, 0],
-                [0, 1, 0]
-            ];
-
-            // Rotatiematrix voor X- en Y-assen
-            const rotationXMatrix = [
-                [1, 0, 0],
-                [0, Math.cos(angleX), -Math.sin(angleX)],
-                [0, Math.sin(angleX), Math.cos(angleX)]
-            ];
-
-            const rotationYMatrix = [
-                [Math.cos(angleY), 0, Math.sin(angleY)],
-                [0, 1, 0],
-                [-Math.sin(angleY), 0, Math.cos(angleY)]
-            ];
-
-            // Combineer matrices om de transformatiematrix te vormen
-            const transformationMatrix = multiplyMatrices(projectionMatrix, rotationXMatrix, rotationYMatrix);
-
-            // Teken elke rand van de kubus na toepassing van transformaties
-            for (const edge of edges) {
-                const startVertex = transformVertex(vertices[edge[0]], transformationMatrix);
-                const endVertex = transformVertex(vertices[edge[1]], transformationMatrix);
-
-                context.beginPath();
-                context.moveTo(startVertex[0] * sizeInput.value + canvas.width / 2, startVertex[1] * sizeInput.value + canvas.height / 2);
-                context.lineTo(endVertex[0] * sizeInput.value + canvas.width / 2, endVertex[1] * sizeInput.value + canvas.height / 2);
-                context.stroke();
-            }
-        }
-
-        // Functie om matrices te vermenigvuldigen
-        function multiplyMatrices(...matrices) {
-            return matrices.reduce((result, matrix) => {
-                const rowsA = result.length;
-                const colsA = result[0].length;
-                const rowsB = matrix.length;
-                const colsB = matrix[0].length;
-                const resultMatrix = new Array(rowsA).fill(0).map(() => new Array(colsB).fill(0));
-
-                for (let i = 0; i < rowsA; i++) {
-                    for (let j = 0; j < colsB; j++) {
-                        for (let k = 0; k < rowsB; k++) {
-                            resultMatrix[i][j] += result[i][k] * matrix[k][j];
-                        }
-                    }
-                }
-
-                return resultMatrix;
-            });
-        }
-
-        // Functie om een hoekpunt te transformeren met behulp van een matrix
-        function transformVertex(vertex, matrix) {
-            const result = matrix.map((row, i) =>
-                row.reduce((acc, val, j) => acc + val * vertex[j], 0)
-            );
-
-            return result;
-        }
-
-        // Functie om de rotatie van de kubus te animeren
-        function animate() {
-            angleX += parseFloat(speedInput.value);
-            angleY += parseFloat(speedInput.value);
-            drawCube();
-            requestAnimationFrame(animate);
-        }
-
-        // Start de animatie
-        animate();
-    </script>
+  <header>
+    <nav id="menu">
+      <ul>
+        <li><a href="#" onclick="loadPage('index.html')">Home</a></li>
+        <li><a href="#" onclick="loadPage('page1.html')">Page 1</a></li>
+        <li><a href="#" onclick="loadPage('page2.html')">Page 2</a></li>
+      </ul>
+    </nav>
+  </header>
+  <div id="content">
+    <!-- Content will be loaded here -->
+  </div>
+  <script src="menu.js"></script>
 </body>
 </html>
