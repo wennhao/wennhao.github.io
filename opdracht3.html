@@ -1,107 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        canvas {
-            border: 1px solid #000;
-        }
-    </style>
-    <title>Perspectiefprojectie van Kubus</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    canvas {
+      border: 1px solid #000;
+    }
+  </style>
+  <title>3D Cube Projection</title>
 </head>
 <body>
-    <canvas id="myCanvas" width="500" height="500"></canvas>
+  <canvas id="cubeCanvas" width="400" height="400"></canvas>
 
-    <script>
-        // Kubuscoördinaten
-        var vertices = [
-            [-1, -1, -1],
-            [1, -1, -1],
-            [1, 1, -1],
-            [-1, 1, -1],
-            [-1, -1, 1],
-            [1, -1, 1],
-            [1, 1, 1],
-            [-1, 1, 1]
-        ];
+  <script>
+    const canvas = document.getElementById('cubeCanvas');
+    const ctx = canvas.getContext('2d');
 
-        // Verbindingen tussen kubuscoördinaten om draadmodel te vormen
-        var edges = [
-            [0, 1], [1, 2], [2, 3], [3, 0],
-            [4, 5], [5, 6], [6, 7], [7, 4],
-            [0, 4], [1, 5], [2, 6], [3, 7]
-        ];
+    // Initial cube coordinates
+    const cubeVertices = [
+      [-1, -1, -1],
+      [1, -1, -1],
+      [1, 1, -1],
+      [-1, 1, -1],
+      [-1, -1, 1],
+      [1, -1, 1],
+      [1, 1, 1],
+      [-1, 1, 1]
+    ];
 
-        // Canvas en context
-        var canvas = document.getElementById('myCanvas');
-        var ctx = canvas.getContext('2d');
+    // Define edges of the cube
+    const cubeEdges = [
+      [0, 1], [1, 2], [2, 3], [3, 0],
+      [4, 5], [5, 6], [6, 7], [7, 4],
+      [0, 4], [1, 5], [2, 6], [3, 7]
+    ];
 
-        // Hoekvariabele voor animatie
-        var angle = 0;
+    // Transformation matrices
+    function scaleMatrix(sx, sy, sz) {
+      return [
+        [sx, 0, 0],
+        [0, sy, 0],
+        [0, 0, sz]
+      ];
+    }
 
-        function drawCube() {
-            // Matrixoperaties voor transformatie
-            var projectionMatrix = [
-                [1, 0, 0],
-                [0, 1, 0],
-                [0, 0, 0]
-            ];
+    function rotateXMatrix(theta) {
+      const cosTheta = Math.cos(theta);
+      const sinTheta = Math.sin(theta);
+      return [
+        [1, 0, 0],
+        [0, cosTheta, -sinTheta],
+        [0, sinTheta, cosTheta]
+      ];
+    }
 
-            var rotationYMatrix = [
-                [Math.cos(angle), 0, Math.sin(angle)],
-                [0, 1, 0],
-                [-Math.sin(angle), 0, Math.cos(angle)]
-            ];
+    function rotateYMatrix(theta) {
+      const cosTheta = Math.cos(theta);
+      const sinTheta = Math.sin(theta);
+      return [
+        [cosTheta, 0, sinTheta],
+        [0, 1, 0],
+        [-sinTheta, 0, cosTheta]
+      ];
+    }
 
-            var combinedMatrix = multiplyMatrices(projectionMatrix, rotationYMatrix);
+    function rotateZMatrix(theta) {
+      const cosTheta = Math.cos(theta);
+      const sinTheta = Math.sin(theta);
+      return [
+        [cosTheta, -sinTheta, 0],
+        [sinTheta, cosTheta, 0],
+        [0, 0, 1]
+      ];
+    }
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+    function translateMatrix(tx, ty, tz) {
+      return [
+        [1, 0, tx],
+        [0, 1, ty],
+        [0, 0, 1]
+      ];
+    }
 
-            // Projecteer en teken de draadkubus
-            for (var i = 0; i < edges.length; i++) {
-                var start = project(vertices[edges[i][0]], combinedMatrix);
-                var end = project(vertices[edges[i][1]], combinedMatrix);
+    function perspectiveMatrix(d) {
+      return [
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1 / d]
+      ];
+    }
 
-                ctx.beginPath();
-                ctx.moveTo(start[0], start[1]);
-                ctx.lineTo(end[0], end[1]);
-                ctx.stroke();
-            }
+    // Combine transformation matrices
+    function multiplyMatrices(matrixA, matrixB) {
+      const result = [];
+      for (let i = 0; i < matrixA.length; i++) {
+        result[i] = [];
+        for (let j = 0; j < matrixB[0].length; j++) {
+          let sum = 0;
+          for (let k = 0; k < matrixA[0].length; k++) {
+            sum += matrixA[i][k] * matrixB[k][j];
+          }
+          result[i][j] = sum;
         }
+      }
+      return result;
+    }
 
-        function project(point, matrix) {
-            // Matrix-vector vermenigvuldiging voor projectie
-            var x = point[0] * matrix[0][0] + point[1] * matrix[1][0] + point[2] * matrix[2][0];
-            var y = point[0] * matrix[0][1] + point[1] * matrix[1][1] + point[2] * matrix[2][1];
-            var w = point[0] * matrix[0][2] + point[1] * matrix[1][2] + point[2] * matrix[2][2];
+    // Draw the cube on the canvas
+    function drawCube() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            return [canvas.width / 2 + x, canvas.height / 2 - y];
-        }
+      // Set the center of the canvas as the rotation point
+      ctx.translate(canvas.width / 2, canvas.height / 2);
 
-        function multiplyMatrices(a, b) {
-            // Matrixvermenigvuldiging
-            var result = [];
-            for (var i = 0; i < a.length; i++) {
-                result[i] = [];
-                for (var j = 0; j < b[0].length; j++) {
-                    var sum = 0;
-                    for (var k = 0; k < a[0].length; k++) {
-                        sum += a[i][k] * b[k][j];
-                    }
-                    result[i][j] = sum;
-                }
-            }
-            return result;
-        }
+      // Update cube rotation angles
+      const rotationX = Date.now() * 0.001; // Rotate around X-axis
+      const rotationY = Date.now() * 0.001; // Rotate around Y-axis
 
-        function animate() {
-            angle += 0.02;
-            drawCube();
-            requestAnimationFrame(animate);
-        }
+      // Apply transformations
+      const transformationMatrix = multiplyMatrices(
+        multiplyMatrices(
+          multiplyMatrices(
+            multiplyMatrices(
+              multiplyMatrices(
+                rotateXMatrix(rotationX),
+                rotateYMatrix(rotationY)
+              ),
+              translateMatrix(0, 0, 5)
+            ),
+            scaleMatrix(50, 50, 50)
+          ),
+          perspectiveMatrix(100)
+        ),
+        translateMatrix(0, 0, 1)
+      );
 
-        animate();
-    </script>
+      // Apply transformation to each vertex
+      const transformedVertices = cubeVertices.map(vertex => {
+        const result = multiplyMatrices(transformationMatrix, [[vertex[0]], [vertex[1]], [vertex[2]], [1]]);
+        return [result[0][0] / result[3][0], result[1][0] / result[3][0]];
+      });
+
+      // Draw edges of the transformed cube
+      ctx.beginPath();
+      cubeEdges.forEach(edge => {
+        ctx.moveTo(transformedVertices[edge[0]][0], transformedVertices[edge[0]][1]);
+        ctx.lineTo(transformedVertices[edge[1]][0], transformedVertices[edge[1]][1]);
+      });
+      ctx.closePath();
+      ctx.strokeStyle = '#000';
+      ctx.stroke();
+
+      // Reset transformations for the next frame
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+      // Request the next frame
+      requestAnimationFrame(drawCube);
+    }
+
+    // Start the animation
+    drawCube();
+  </script>
 </body>
 </html>
