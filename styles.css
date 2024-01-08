@@ -1,26 +1,31 @@
-/* Add your fancy styles for the menu here */
-#menu {
-    background-color: #333;
-    padding: 10px;
-  }
-  
-  #menu ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-  
-  #menu ul li {
-    display: inline;
-    margin-right: 10px;
-  }
-  
-  #menu ul li a {
-    color: white;
-    text-decoration: none;
-  }
-  
-  #menu ul li a:hover {
-    text-decoration: underline;
-  }
-  
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  background-color: #333;
+  color: white;
+  padding: 1em;
+}
+
+nav ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+nav li {
+  display: inline;
+  margin-right: 20px;
+}
+
+nav a {
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+}
+
+main {
+  padding: 20px;
+}
