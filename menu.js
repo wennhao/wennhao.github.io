@@ -6,7 +6,12 @@ function loadPage(page) {
     fetch(page)
       .then(response => response.text())
       .then(data => {
-        document.getElementById('content').innerHTML = data;
+        // Extract content from loaded page (excluding head and script tags)
+        var contentStart = data.indexOf('<body>') + 6;
+        var contentEnd = data.indexOf('</body>');
+        var content = data.substring(contentStart, contentEnd);
+        
+        document.getElementById('content').innerHTML = content;
       });
   }
   
